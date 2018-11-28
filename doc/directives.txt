@@ -1,0 +1,10 @@
+name:
+	- costom element is case insensitive
+	- must be snack-case
+	- must contains at least one dash (-)
+	- must contains only a-z and -
+css:
+	- Use classes instead of ids
+	- prefex classes with costom element name
+
+	

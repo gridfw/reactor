@@ -1,0 +1,29 @@
+//- we write custom element content only
+h1 custom element example
+figure
+	//- "image" is custom element attribute
+	//-"" is alias of "self"
+	//- "this" is alias of "self"
+	img(src= self.image.src height= self.image.height width= self.image.width)
+//- "title" is custom element attribute
+p #{self.title}
+//- "description" is custom element attribute
+div desc: #{self.description}
+//- sub costom element
+div
+	sub-costElement(attr1 = @parentAttr1)
+	sub-costElement(attr1 = self.parentAttr1)
+//- form elements
+form
+	//- set value when whole element is updated
+	input(value=self.value)
+	//- this is a comment
+		this is too
+	//- attach value to property, getter/setter
+	//- when self.value is changed, so input.value and vers versa
+	input(value=self.value)
+//- "cust-ele-buttons" is specific custom element class, prefixed with custom element name
+div.cust-ele-buttons
+	//- work with events
+	//- "btnClick" is private method
+	button(:click='btnClick' :focus='btnFocus')
