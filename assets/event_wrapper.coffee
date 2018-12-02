@@ -2,8 +2,9 @@
  * Event wrapper
 ###
 class EventWrapper
-	constructor: (event, @bubbles=true)->
+	constructor: (event, @currentTarget, @bubbles)->
 		@originalEvent = event
+		@target = event.target
 		return
 	# stop propagation inside framework registered listeners
 	# this do not affect native 
@@ -20,35 +21,25 @@ class EventWrapper
 		@originalEvent.preventDefault()
 		this
 
+EventWrapperPrototype = EventWrapper.prototype
 # getter values
-_eventWrapperValueProxy = (keyName)->
-	get: ->
+['altKey', 'ctrlKey', 'shiftKey', 'defaultPrevented', 'timeStamp', 'type', 'x', 'y'].forEach (keyName)->
+	_defineProperty EventWrapperPrototype, keyName, get ->
 		v= @originalEvent[keyName]
 		_defineProperty this, keyName, value: v
 		v
-_defineProperties EventWrapper.prototype,
-	altKey: _eventWrapperValueProxy 'altKey'
-	ctrlKey: _eventWrapperValueProxy 'ctrlKey'
-	shiftKey: _eventWrapperValueProxy 'shiftKey'
-	defaultPrevented: _eventWrapperValueProxy 'defaultPrevented'
-	x: _eventWrapperValueProxy 'x'
-	y: get: ->
-		e = @originalEvent
-
-
-
-_eventPrototype = Object.create null
-Object.defineProperties _eventPrototype,
-	stopPropagation: ->
-	stopImmediatePropagation() # just like native one
-
-	preventDefault() # just like prevent default
-
-	
-
-	path: []
-
-	x: clientX
-	y: clientY
-	timeStamp
-	type
+# path
+_defineProperty EventWrapperPrototype, 'path', ->
+	v = @originalEvent
+	if 'path' of v
+		v = v.path
+	else
+		v = []
+		ele = @target
+		loop
+			v.push ele
+			ele = ele.parentNode
+			break unless ele
+		v.push window
+	_defineProperty this, 'path', value: v
+	return v
