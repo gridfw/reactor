@@ -11,6 +11,8 @@ pug				= require 'gulp-pug'
 through 		= require 'through2'
 path			= require 'path'
 PKG				= require './package.json'
+# sass			= require 'gulp-sass'
+sassCompiler	= require 'node-sass'
 
 # check arguments
 # SUPPORTED_MODES = ['node', 'browser']
@@ -22,19 +24,19 @@ PKG				= require './package.json'
 # if settings.mode is 'node'
 # 	destFileName = PKG.main.split('/')[1]
 # else
-# 	destFileName = "grid-model-nav-#{PKG.version}.js"
+destFileName = PKG.main.split('/')[1]
 
 # compile js (background, popup, ...)
-# compileCoffee = ->
-# 	gulp.src "assets/index.coffee"
-# 		.pipe include hardFail: true
-# 		.pipe template settings
-# 		.pipe gulp.dest "build"
+compileCoffee = ->
+	gulp.src "assets/index.coffee"
+		.pipe include hardFail: true
+		# .pipe template settings
+		.pipe gulp.dest "build"
 		
-# 		.pipe coffeescript(bare: true).on 'error', errorHandler
-# 		.pipe rename destFileName
-# 		.pipe gulp.dest "build"
-# 		.on 'error', errorHandler
+		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe rename destFileName
+		.pipe gulp.dest "build"
+		.on 'error', errorHandler
 
 compileTests = ->
 	gulp.src "test-assets/*.coffee"
@@ -45,11 +47,22 @@ compileTests = ->
 		.pipe coffeescript(bare: true).on 'error', errorHandler
 		.pipe gulp.dest "test-build"
 		.on 'error', errorHandler
+compilePugTest = ->
+	gulp.src "test-assets/*.pug"
+		.pipe pug
+			filters:
+				sass: (text, options)->
+					sassCompiler.renderSync data: text, indentedSyntax: on
+		# .pipe template settings
+		# .pipe gulp.dest "test-build"
+		.pipe gulp.dest "test-build"
+		.on 'error', errorHandler
 
 # compile
 watch = ->
-	# gulp.watch 'assets/**/*.coffee', compileCoffee
+	gulp.watch 'assets/**/*.coffee', compileCoffee
 	gulp.watch 'test-assets/**/*.coffee', compileTests
+	gulp.watch 'test-assets/**/*.pug', compilePugTest
 	return
 
 # error handler
@@ -81,5 +94,5 @@ errorHandler= (err)->
 	return
 
 # create default task
-gulp.task 'default', gulp.series compileTests, watch #compileCoffee, 
+gulp.task 'default', gulp.series compileCoffee, compileTests, compilePugTest, watch #
 

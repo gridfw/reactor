@@ -24,12 +24,12 @@ class EventWrapper
 EventWrapperPrototype = EventWrapper.prototype
 # getter values
 ['altKey', 'ctrlKey', 'shiftKey', 'defaultPrevented', 'timeStamp', 'type', 'x', 'y'].forEach (keyName)->
-	_defineProperty EventWrapperPrototype, keyName, get ->
+	_defineProperty EventWrapperPrototype, keyName, get: ->
 		v= @originalEvent[keyName]
 		_defineProperty this, keyName, value: v
 		v
 # path
-_defineProperty EventWrapperPrototype, 'path', ->
+_defineProperty EventWrapperPrototype, 'path', get: ->
 	v = @originalEvent
 	if 'path' of v
 		v = v.path

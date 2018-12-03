@@ -51,3 +51,8 @@ event=
 	y: clientY
 	timeStamp
 	type
+
+### special events ###
+Reactor.watch 'selector'
+	hover: (event) -> # when mouseover first time
+	hout: (event) -> # when mouse out first time

@@ -12,6 +12,10 @@ _WatchListeners = _create null
 _WatchListenersStep = 4
 
 
+# add special watch events
+#=include watch-special.coffee
+
+
 ### watch events ###
 _defineProperties Reactor,
 	###*
@@ -36,7 +40,6 @@ _defineProperties Reactor,
 		# add events
 		for eventName, eventValue of events
 			eventName = eventName.toLowerCase()
-			ev = _WatchListeners[eventName]
 			# options
 			if typeof eventValue is 'function'
 				eventValue=
@@ -47,15 +50,27 @@ _defineProperties Reactor,
 				throw new Error "Event descriptor expected object" unless typeof eventValue is 'object' and eventValue
 				throw new Error "Listener required" unless 'listener' of eventValue
 				throw new Error "Listener expected function" unless typeof eventValue.listener is 'function'
-			# already set event
-			if ev
-				ev.push !!eventValue.force, selector, !!eventValue.passive, eventValue.listener
-			# register new Event
-			else 
-				_WatchListeners[eventName]= [!!eventValue.force, selector, !!eventValue.passive, eventValue.listener]
-				# register the event on the DOM
-				_registerWatchEvent eventName
+			# when special event
+			if eventName of _watchSpecialEvents
+				_watchSpecialEvents[eventName].add selector, eventValue
+			# else: native event
+			else
+				_watchRegisterNativeEvent eventName, eventValue, selector
 		return
+
+###*
+ * Register native event
+###
+_watchRegisterNativeEvent = (eventName, eventValue, selector)->
+	ev = _WatchListeners[eventName]
+	# already set event
+	if ev
+		ev.push !!eventValue.force, selector, !!eventValue.passive, eventValue.listener
+	# register new Event
+	else 
+		_WatchListeners[eventName]= [!!eventValue.force, selector, !!eventValue.passive, eventValue.listener]
+		# register the event on the DOM
+		_registerWatchEvent eventName
 
 ###*
  * Register the event on the DOM
@@ -66,7 +81,6 @@ _registerWatchEvent = (eventName)->
 _watchEventExec = (event, eventName) ->
 	# get registered listeners
 	ev = _WatchListeners[eventName]
-	console.log '----ev: ', ev
 	return unless ev
 	len= ev.length
 	# loop over elements
