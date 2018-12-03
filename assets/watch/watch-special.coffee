@@ -36,9 +36,9 @@ _watchSpecialEvents=
 					data = _data this
 					moveEvent = new MoveEventWrapper event, this
 					unless data.move
-						data.move = []
+						data.move = [event.x, event.y, event.x, event.y] # [startX, startY, lastX, lastY, last-timestamp]
 						# trigger move starts
-						_trigger this, 'movestart', {}
+						_triggerSelf this, 'movestart', {}
 					# trigger move
 					listener.call this, moveEvent
 					return
@@ -47,6 +47,8 @@ _watchSpecialEvents=
 				mouseUp = (event)=>
 					window.removeEventListener 'mousemove', mousemove, true
 					# trigger move ends
+					data = _data this
+					delete data.move
 					_trigger this, 'moveend', {} if (_data this).move
 					return
 				window.addEventListener 'mouseup', mouseup, {once: true, capture: true}
