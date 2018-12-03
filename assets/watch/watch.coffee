@@ -56,7 +56,24 @@ _defineProperties Reactor,
 			# else: native event
 			else
 				_watchRegisterNativeEvent eventName, eventValue, selector
-		return
+		# chain
+		return this
+	###*
+	 * Remove event listeners
+	 * @param  {[type]} selector [description]
+	 * @param  {[type]} events   [description]
+	 *
+	 * @example
+	 * Reactor.unwatch('selector') # remove all listeners on this selector
+	 * Reactor.unwatch('selector', {click: true, dblclick: true}) # remove all click and dblclick listeners
+	 * Reactor.unwatch('selector', {click: fx}) # remove "fx" listener on click event 
+	###
+	# unwatch: value: (selector, events)->
+	# 	throw new Error 'Selector expected string' unless typeof selector is 'string'
+	# 	# special events
+	# 	if eventName of _watchSpecialEvents
+	# 	# chain
+	# 	this
 
 ###*
  * Register native event
