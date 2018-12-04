@@ -15,3 +15,8 @@ _randAttr = (obj, prefix)->
 
 _clone = (obj)->
 	Object.assign (_create null), obj
+
+# Set immediate on browsers
+if typeof setImmediate is 'undefined'
+	setImmediate = (cb)-> setTimeout cb, 0
+	clearImmediate= (id)-> clearTimeout id

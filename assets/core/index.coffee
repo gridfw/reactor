@@ -11,4 +11,7 @@ do ->
 	# watch events
 	do ->
 		#=include watch/watch.coffee
+	# define component
+	do ->
+		#=include components/index.coffee
 	return

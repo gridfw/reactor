@@ -24,20 +24,40 @@ sassCompiler	= require 'node-sass'
 # if settings.mode is 'node'
 # 	destFileName = PKG.main.split('/')[1]
 # else
-destFileName = PKG.main.split('/')[1]
+destNodeFileName = PKG.main.split('/')[1]
+destBrowserFileName= "#{PKG.name}.js"
 
 # compile js (background, popup, ...)
-compileCoffee = ->
-	gulp.src "assets/index.coffee"
+compileCoffeeBrowser = ->
+	gulp.src "assets/core/index.coffee"
 		.pipe include hardFail: true
-		# .pipe template settings
-		.pipe gulp.dest "build"
+		.pipe template mode:'browser'
+		# .pipe gulp.dest "build"
 		
 		.pipe coffeescript(bare: true).on 'error', errorHandler
-		.pipe rename destFileName
+		.pipe rename destBrowserFileName
 		.pipe gulp.dest "build"
 		.on 'error', errorHandler
-
+compileNode = ->
+	gulp.src "assets/compiler.coffee"
+		.pipe include hardFail: true
+		.pipe template mode:'node'
+		# .pipe gulp.dest "build"
+		
+		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe rename destNodeFileName
+		.pipe gulp.dest "build"
+		.on 'error', errorHandler
+compileGulp = ->
+	gulp.src "assets/gulp.coffee"
+		.pipe include hardFail: true
+		.pipe template mode:'node'
+		# .pipe gulp.dest "build"
+		
+		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe rename 'gulp-reactor'
+		.pipe gulp.dest "build"
+		.on 'error', errorHandler
 compileTests = ->
 	gulp.src "test-assets/*.coffee"
 		.pipe include hardFail: true
@@ -58,9 +78,20 @@ compilePugTest = ->
 		.pipe gulp.dest "test-build"
 		.on 'error', errorHandler
 
+
+# client compiler
+GulpReactor = require 'build/gulp-reactor'
+compileClientReactorTemplates = ->
+	gulp.src 'test-assets/reactor-components/*.pug'
+		.pipe GulpReactor.compileTemplates()
+		.pipe rename 'my-reactor-components.js'
+		.pipe dest 'test-build'
+
 # compile
 watch = ->
-	gulp.watch 'assets/**/*.coffee', compileCoffee
+	gulp.watch 'assets/core/**/*.coffee', compileCoffeeBrowser
+	gulp.watch 'assets/**/*.coffee', compileNode
+	gulp.watch 'assets/gulp.coffee', compileGulp
 	gulp.watch 'test-assets/**/*.coffee', compileTests
 	gulp.watch 'test-assets/**/*.pug', compilePugTest
 	return
@@ -94,5 +125,7 @@ errorHandler= (err)->
 	return
 
 # create default task
-gulp.task 'default', gulp.series compileCoffee, compileTests, compilePugTest, watch #
+gulp.task 'default', gulp.series Gulp.parallel(
+	compileCoffeeBrowser, compileTests, compilePugTest, compileNode, compileGulp
+	), watch #
 

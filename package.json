@@ -2,7 +2,7 @@
   "name": "reactor",
   "version": "1.0.0",
   "description": "Reactor",
-  "main": "build/reactor.js",
+  "main": "build/reactor-node.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

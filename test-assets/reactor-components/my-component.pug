@@ -1,0 +1,35 @@
+doctype html
+html
+	head
+		title watch test
+		style.
+			.text-right{text-align: right}
+			.text-center{text-align: center}
+			.btn{
+				display: inline-block;
+				background: blue;
+				padding: 4px;
+				border-radius: 4px;
+				color: white;
+				cursor: pointer;
+			}
+			my-component{
+				display: block;
+				width: 300px;
+			}
+			my-component h1{
+				font-size: 1.2rem
+			}
+	body
+		//- component 1
+		div
+			my-component
+				form
+					h1 This is my component
+					input.txt.text-center(type="text" value="-- test value --")
+					div.btns.text-right
+						span.btn(:click="okClick" :mouseover="okHover") ok
+						span.btn(:click="cancelClick") cancel
+		//- js
+		script(src="../build/reactor.js")
+		script(src="component1.js")
