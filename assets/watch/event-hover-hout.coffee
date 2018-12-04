@@ -5,17 +5,14 @@
  * will not call mouseout intel the pointer physically quit the element
  * @param {Object} eventDescriptor - {passive:boolean, force:boolean, listener:function(event){}}
 ###
-Reactor.addSpecialEvent 'hover', 'mouseover', (selector, eventDescriptor, eventGrp)->
-	return _watchHoverOut 'hover', selector, eventGrp, eventDescriptor, eventDescriptor.listener, null
+Reactor.addSpecialEvent 'hover', 'mouseover', (orListener)-> _watchHoverOut orListener, null
 
 ###*
  * hOut
  * when mouse quit the element (not propaged event)
  * @type {[type]}
 ###
-Reactor.addSpecialEvent 'hout', 'mouseover', (selector, eventDescriptor, eventGrp)->
-	_watchHoverOut 'hout', selector, eventGrp, eventDescriptor, null, eventDescriptor.listener
-	return
+Reactor.addSpecialEvent 'hout', 'mouseover', (orListener)-> _watchHoverOut null, orListener
 
 ###*
  * watch hover, out

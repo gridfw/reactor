@@ -12,6 +12,7 @@
 ###
 _WatchListeners = _create null
 _WatchMainListeners = _create null
+_watchSpecialEvents = _create null
 _mapListeners = new WeakMap()
 _WatchListenersStep = 6
 _checkEventName = /^[a-z_-]+(?:\.[a-z._-]+)?$/
@@ -19,6 +20,7 @@ _checkEventName = /^[a-z_-]+(?:\.[a-z._-]+)?$/
 
 # add special watch events
 #=include watch-special.coffee
+#=include event-*.coffee
 
 
 ### watch events ###
@@ -68,7 +70,7 @@ _defineProperties Reactor,
 			if evSpecial
 				nativeEventName = evSpecial.nativeEvent
 				orListener = eventValue.listener # original listener
-				eventValue.listener = listener = evSpecial.getListener eventValue
+				eventValue.listener = listener = evSpecial.getListener orListener
 				throw new Error "Expected function as listener" unless typeof listener is 'function'
 				_mapListeners.set orListener, listener
 			else
@@ -162,40 +164,59 @@ _registerWatchEvent = (eventName)->
 	window.addEventListener eventName, listener, true
 
 _watchEventExec = (event, eventName) ->
+	# event path
+	eventPath = event.path
+	unless eventPath
+		eventPath = []
+		ele = event.target
+		loop
+			eventPath.push ele
+			ele = ele.parentNode
+			break unless ele
+		eventPath.push window
+		event.path = eventPath
 	# get registered listeners
 	ev = _WatchListeners[eventName]
 	return unless ev
-	len= ev.length
 	# loop over elements
 	bubbles = event.bubbles
 	for ele in event.path
 		break if ele is document
 		# exec all listeners
-		i =0
-		while i < len
-			# continue if no force and propagation stoped
-			force	= ev[i]
-			unless bubbles or force
-				i += _WatchListenersStep
-				continue
-			# selector
-			selector = ev[++i]
-			# unless selector ele
-			unless ele.matches selector
-				i += 5 # passive, listener, eventName, eventGrp
-				continue 
-			# is passive
-			passive = ev[++i]
-			listener= ev[++i]
-			i+= 3 # eventName, eventGrp
-			# exec listener
-			if passive
-				setTimeout (-> listener.call ele, new EventWrapper event, ele, bubbles), 0
-			else
-				evnt = new EventWrapper event, ele, bubbles
-				listener.call ele, evnt
-				bubbles = evnt.bubbles
+		evnt = new EventWrapper event, ele, bubbles
+		bubbles = _triggerEvent ele, ev, evnt, bubbles
 	return
+_triggerEvent = (ele, queue, event, bubbles)->
+	i = 0
+	len = queue.length
+	doBubbles = bubbles
+	execBubble = bubbles || ele is event.target
+	while i < len
+		# continue if no force and propagation stoped
+		force	= queue[i]
+		unless execBubble or force
+			i += _WatchListenersStep
+			continue
+		# selector
+		selector = queue[++i]
+		# unless selector ele
+		unless ele.matches selector
+			i += 5 # passive, listener, eventName, eventGrp
+			continue 
+		# is passive
+		passive = queue[++i]
+		listener= queue[++i]
+		i+= 3 # eventName, eventGrp
+		# exec listener
+		if passive
+			do (listener)->
+				setTimeout (-> listener.call ele, event), 0
+		else
+			listener.call ele, event
+			# bubbles
+			doBubbles = off if event.bubbles is off
+			bubbles = off if event.bubblesImmediate is off
+	return doBubbles
 
 ###*
  * remove watch
@@ -227,4 +248,13 @@ _unwatchRm = (eventNativeName, checkCb)->
 		delete _WatchListeners[eventNativeName]
 		window.removeEventListener eventNativeName, _WatchMainListeners[eventNativeName], true
 		eventNativeName[eventNativeName] = null
+	return
+
+###*
+ * trigger self event
+###
+_triggerSelf = (ele, eventName, event)->
+	ev = _WatchListeners[eventName]
+	return unless ev
+	_triggerEvent ele, ev, event, true
 	return
