@@ -150,9 +150,9 @@ _watchRegisterNativeEvent = (eventName, nativeEventName, eventGrp, eventValue, s
 		ev.push !!eventValue.force, selector, !!eventValue.passive, eventValue.listener, eventName, eventGrp
 	# register new Event
 	else 
-		_WatchListeners[eventName]= [!!eventValue.force, selector, !!eventValue.passive, eventValue.listener, eventName, eventGrp]
+		_WatchListeners[nativeEventName]= [!!eventValue.force, selector, !!eventValue.passive, eventValue.listener, eventName, eventGrp]
 		# register the event on the DOM
-		_registerWatchEvent eventName
+		_registerWatchEvent nativeEventName
 	return
 
 ###*
@@ -210,9 +210,17 @@ _triggerEvent = (ele, queue, event, bubbles)->
 		# exec listener
 		if passive
 			do (listener)->
-				setTimeout (-> listener.call ele, event), 0
+				setTimeout (->
+					try
+						listener.call ele, event
+					catch err
+						Reactor.error 'UNCAUGHT_ERROR>>', err
+				), 0
 		else
-			listener.call ele, event
+			try
+				listener.call ele, event
+			catch err
+				Reactor.error 'UNCAUGHT_ERROR>>', err
 			# bubbles
 			doBubbles = off if event.bubbles is off
 			bubbles = off if event.bubblesImmediate is off

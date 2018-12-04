@@ -17,3 +17,8 @@ Reactor.watch '.test2',
 	hover: (event)-> console.log '--- hOver'
 	mouseout: (event)-> console.log '*** mouseout'
 	hout: (event)-> console.log '--- hOut'
+
+Reactor.watch '.slideBtn',
+	move: (event)-> console.log '---- move: ', event.x, ', ', event.y
+	moveStart: (event)-> console.log '====> move start'
+	moveEnd: (event)-> console.log '+++++ move ends', event
