@@ -7,5 +7,7 @@ do ->
 	#=include event_wrapper.coffee
 	#=include data.coffee
 
-	#=include watch/watch.coffee
+	# watch events
+	do ->
+		#=include watch/watch.coffee
 	return
