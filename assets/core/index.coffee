@@ -6,7 +6,9 @@ do ->
 	Reactor = window.Reactor = _create null
 	#=include log.coffee
 	#=include event_wrapper.coffee
-	#=include data.coffee
+	<% if(mode === 'browser'){ %>
+	#=include browser-data.coffee
+	<% } %>
 
 	# watch events
 	do ->

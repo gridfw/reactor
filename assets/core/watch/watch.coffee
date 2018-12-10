@@ -170,14 +170,7 @@ _watchEventExec = (event, eventName) ->
 	# event path
 	eventPath = event.path
 	unless eventPath
-		eventPath = []
-		ele = event.target
-		loop
-			eventPath.push ele
-			ele = ele.parentNode
-			break unless ele
-		eventPath.push window
-		event.path = eventPath
+		eventPath = event.path = _targetPathGen event.target
 	# get registered listeners
 	ev = _WatchListeners[eventName]
 	return unless ev
@@ -186,10 +179,10 @@ _watchEventExec = (event, eventName) ->
 	for ele in event.path
 		break if ele is document
 		# wrap event
-		if a = _watchSpecialEventsWrapper[eventName]
-			evnt = new a event, ele
-		else
-			evnt = new EventWrapper event, ele, bubbles
+		eventClss = _watchSpecialEventsWrapper[eventName]
+		unless eventClss
+			eventClss = EventWrapper
+		evnt = new eventClss event, ele, bubbles
 		# exec all listeners
 		bubbles = _triggerEvent ele, ev, evnt, bubbles
 	return

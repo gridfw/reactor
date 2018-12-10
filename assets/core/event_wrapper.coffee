@@ -30,16 +30,5 @@ EventWrapperPrototype = EventWrapper.prototype
 		v
 # path
 _defineProperty EventWrapperPrototype, 'path', get: ->
-	v = @originalEvent
-	if 'path' of v
-		v = v.path
-	else
-		v = []
-		ele = @target
-		loop
-			v.push ele
-			ele = ele.parentNode
-			break unless ele
-		v.push window
-	_defineProperty this, 'path', value: v
+	_defineProperty this, 'path', value: _targetPathGen @target
 	return v

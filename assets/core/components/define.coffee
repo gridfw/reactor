@@ -2,7 +2,7 @@
  * Define components
 ###
 _components = _create null
-COMPONENT_NAME_CHECK = /^[a-z][a-z-]+[a-z]$/
+COMPONENT_NAME_CHECK = /^[A-Z][A-Z-]+[A-Z]$/
 # component architecture
 <%
 	var componentAttr = [
@@ -21,8 +21,8 @@ _defineProperty Reactor, 'define', value: (componentName, options)->
 	# checks
 	throw new Error "Component name expected string" unless typeof componentName is 'string'
 	throw new Error 'Illegal arguments' unless arguments.length is 2 and typeof options is 'object' and options
-	componentName = componentName.toLowerCase()
-	throw new Error "Component name must match: #{COMPONENT_NAME_CHECK.toString()}" unless COMPONENT_NAME_CHECK.test componentName
+	componentName = componentName.toUpperCase()
+	throw new Error "Component name must match: #{COMPONENT_NAME_CHECK.toString()}, got <#{componentName}>" unless COMPONENT_NAME_CHECK.test componentName
 	throw new Error "Component with some name <#{componentName}> are already set" if _components[componentName]
 	# extends
 	# template check
@@ -38,7 +38,7 @@ _defineProperty Reactor, 'define', value: (componentName, options)->
 	if 'listeners' of options
 		for k,v of options.listeners
 			throw new Error "listeners.#{k} expected function" unless typeof v is 'function'
-		component[<%= component.listeners %>] = listeners
+		component[<%= component.listeners %>] = options.listeners
 	<% } %>
 	# 
 

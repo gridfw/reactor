@@ -16,5 +16,8 @@ _defineProperty Reactor, 'loadTemplate', value: (template)->
 
 	# add events when browser
 	<% if(mode === 'browser') { %>
-	_defineBrowserEvent evName for evName in template.events
+	for evName in template.events
+		_defineBrowserEvent evName unless _browserListeners[evName]
 	<% } %>
+	# chain
+	this

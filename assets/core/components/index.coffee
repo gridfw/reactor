@@ -7,5 +7,6 @@
 
 # browser
 <% if(mode === 'browser'){ %>
+#=include browser-init-component.coffee
 #=include browser-events.coffee
 <% } %>
