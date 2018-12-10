@@ -1,17 +1,9 @@
-# Server side:
-# 		change Reactor.templateResolver = (templateName) -> templateAbsPath
-# 		or set full path as templateName (not recommended)
-# browser side:
-# 		Reactor.templateResolver = (templateName) -> Promise.resolve {render: templateRenderFunction, events: ['click', ...]}
 
-<% if(mode is 'node'){ %>
-Reactor.templateResolver = (templateName)-> 
-
-<% } %>
 
 ### my component ###
 Reactor.define 'my-component',
-	template: 'my-component.pug'
+	template: 'my-component'
+	# path: 'absPath' # @optional, when has an absolute path to resolve this template
 	attr: # or "attributes" or "attrs"
 		value:
 			get: -> @querySelector('input.txt').value
