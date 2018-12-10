@@ -13,9 +13,11 @@
 _WatchListeners = _create null
 _WatchMainListeners = _create null
 _watchSpecialEvents = _create null
+_watchSpecialEventsWrapper = _create null
 _mapListeners = new WeakMap()
 _WatchListenersStep = 6
 _checkEventName = /^[a-z_-]+(?:\.[a-z._-]+)?$/
+_checkEventRegex= /^[a-z_-]+$/
 
 
 # add special watch events
@@ -68,13 +70,14 @@ _defineProperties Reactor,
 			# when special event
 			evSpecial = _watchSpecialEvents[eventName]
 			if evSpecial
-				nativeEventName = evSpecial.nativeEvent
+				nativeEventName = evSpecial[<%= watchSpecialEvents.nativeEvent %>]
 				orListener = eventValue.listener # original listener
-				eventValue.listener = listener = evSpecial.getListener orListener
+				eventValue.listener = listener = evSpecial[<%= watchSpecialEvents.listener %>] orListener
 				throw new Error "Expected function as listener" unless typeof listener is 'function'
 				_mapListeners.set orListener, listener
 			else
 				nativeEventName = eventName
+			# nativeEventName = _watchSpecialEvents[eventName]?[<%= watchSpecialEvents.nativeEvent %>] || eventName
 			# else: native event
 			_watchRegisterNativeEvent eventName, nativeEventName, eventGrp, eventValue, selector
 		# chain
@@ -122,7 +125,7 @@ _defineProperties Reactor,
 							if evGrp
 								evGrp is eventGrp or eventGrp.startsWith eventGrpDot
 					# native event
-					nativeEventName = _watchSpecialEvents[eventName]?.nativeEvent || eventName
+					nativeEventName = _watchSpecialEvents[eventName]?[<%= watchSpecialEvents.nativeEvent %>] || eventName
 					# check and remove
 					_unwatchRm nativeEventName, (evSelector, evListener, evName, evGrp)->
 						# we did'nt use "Array::every" method for performance purpose
@@ -182,8 +185,12 @@ _watchEventExec = (event, eventName) ->
 	bubbles = event.bubbles
 	for ele in event.path
 		break if ele is document
+		# wrap event
+		if a = _watchSpecialEventsWrapper[eventName]
+			evnt = new a event, ele
+		else
+			evnt = new EventWrapper event, ele, bubbles
 		# exec all listeners
-		evnt = new EventWrapper event, ele, bubbles
 		bubbles = _triggerEvent ele, ev, evnt, bubbles
 	return
 _triggerEvent = (ele, queue, event, bubbles)->

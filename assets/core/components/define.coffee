@@ -8,9 +8,9 @@ COMPONENT_NAME_CHECK = /^[a-z][a-z-]+[a-z]$/
 	var componentAttr = [
 		'listeners'
 	];
-	var component = Object.create null
+	var component = Object.create(null);
 	for(var i=0, len=componentAttr.length; i<len; ++i)
-		component[componentAttr[i]] = i
+		component[componentAttr[i]] = i;
 %>
 # browser flags
 <% if(mode === 'browser'){ %>
@@ -38,7 +38,7 @@ _defineProperty Reactor, 'define', value: (componentName, options)->
 	if 'listeners' of options
 		for k,v of options.listeners
 			throw new Error "listeners.#{k} expected function" unless typeof v is 'function'
-		component[<% component.listeners %>] = listeners
+		component[<%= component.listeners %>] = listeners
 	<% } %>
 	# 
 

@@ -80,8 +80,8 @@ compilePugTest = ->
 
 
 # client compiler
-GulpReactor = require 'build/gulp-reactor'
 compileClientReactorTemplates = ->
+	GulpReactor = require 'build/gulp-reactor'
 	gulp.src 'test-assets/reactor-components/*.pug'
 		.pipe GulpReactor.compileTemplates()
 		.pipe rename 'my-reactor-components.js'
@@ -125,7 +125,7 @@ errorHandler= (err)->
 	return
 
 # create default task
-gulp.task 'default', gulp.series Gulp.parallel(
+gulp.task 'default', gulp.series gulp.parallel(
 	compileCoffeeBrowser, compileTests, compilePugTest, compileNode, compileGulp
 	), watch #
 
