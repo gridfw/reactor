@@ -12,18 +12,9 @@
 ###
 _WatchListeners = _create null
 _WatchMainListeners = _create null
-_watchSpecialEvents = _create null
-_watchSpecialEventsWrapper = _create null
 _mapListeners = new WeakMap()
 _WatchListenersStep = 6
 _checkEventName = /^[a-z_-]+(?:\.[a-z._-]+)?$/
-_checkEventRegex= /^[a-z_-]+$/
-
-
-# add special watch events
-#=include watch-special.coffee
-#=include event-*.coffee
-
 
 ### watch events ###
 _defineProperties Reactor,

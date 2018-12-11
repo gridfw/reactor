@@ -21,14 +21,3 @@ if typeof setImmediate is 'undefined'
 	setImmediate = (cb)-> setTimeout cb, 0
 	clearImmediate= (id)-> clearTimeout id
 
-# generate event path on non webkit browsers
-<% if(mode === 'browser') { %>
-_targetPathGen = (ele)->
-	v = []
-	loop
-		v.push ele
-		ele = ele.parentNode
-		break unless ele
-	v.push window
-	return v
-<% } %>

@@ -1,4 +1,11 @@
 
+# prototype
+#=include prototype.coffee
+<% if(mode === 'browser'){ %>
+#=include prototype-browser.coffee
+<% } %>
+
+
 # load templates
 #=include load-template.coffee
 

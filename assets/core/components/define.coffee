@@ -1,5 +1,11 @@
 ###*
  * Define components
+ * @param {string} componentName - Name of the component to add
+ * @optional @param {string} options.template - name of the template to use to render this component, @default component name
+ * @optional @param {Map internal listeners} options.listeners - Map of internal listeners used inside browser
+ * @optional @param {Map} attr - Map of external properties (methods and attributes) @see documentation
+ * @optional @param {Map} attrs - alias to attr
+ * @optional @param {Map} properties - alias to attr
 ###
 _components = _create null
 COMPONENT_NAME_CHECK = /^[A-Z][A-Z-]+[A-Z]$/
@@ -7,6 +13,7 @@ COMPONENT_NAME_CHECK = /^[A-Z][A-Z-]+[A-Z]$/
 <%
 	var componentAttr = [
 		'listeners'
+		'render' # function that will render this component
 	];
 	var component = Object.create(null);
 	for(var i=0, len=componentAttr.length; i<len; ++i)
@@ -40,7 +47,12 @@ _defineProperty Reactor, 'define', value: (componentName, options)->
 			throw new Error "listeners.#{k} expected function" unless typeof v is 'function'
 		component[<%= component.listeners %>] = options.listeners
 	<% } %>
-	# 
+	# check for render
+	unless component[<%= component.render %>] = _reactorTemplateRender[options.template]
+		throw new Error "Unknown template: #{options.template}"
+
+	# chain
+	this
 
 # create component basic style in browsers
 <% if(mode === 'browser') { %>

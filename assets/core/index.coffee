@@ -2,13 +2,17 @@
  * Reactor
 ###
 do ->
+	DESCRIPTOR = Symbol 'DESCRIPTOR'
 	#=include utils.coffee
 	Reactor = window.Reactor = _create null
 	#=include log.coffee
-	#=include event_wrapper.coffee
 	<% if(mode === 'browser'){ %>
+	#=include browser-utils.coffee
 	#=include browser-data.coffee
 	<% } %>
+
+	# events
+	#=include events/index.coffee
 
 	# watch events
 	do ->

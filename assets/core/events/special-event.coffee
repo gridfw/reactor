@@ -4,6 +4,9 @@
  * @param {string} nativeEventName	- native event that will trigger this special event
  * @param {function} getListenerCb	- event trigger logic @return {function} listener
 ###
+_checkEventRegex= /^[a-z_-]+$/
+_watchSpecialEvents = _create null
+_watchSpecialEventsWrapper = _create null
 <%
 var watchSpecialEvents = {
 	listener : 0,

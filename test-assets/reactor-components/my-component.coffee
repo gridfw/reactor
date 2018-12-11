@@ -4,7 +4,7 @@
 Reactor.define 'my-component',
 	template: 'my-component'
 	# path: 'absPath' # @optional, when has an absolute path to resolve this template
-	attr: # or "attributes" or "attrs"
+	attr: # or "properties" or "attrs"
 		value:
 			get: -> @querySelector('input.txt').value
 			set: -> @querySelector('input.txt').value

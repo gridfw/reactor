@@ -9,12 +9,27 @@ _defineBrowserEvent = (eventName)->
 	throw new Error "Event [#{eventName}] already set" if _browserListeners[eventName]
 	evSpecial = _watchSpecialEvents[eventName]
 	if evSpecial
-		listener = _defineBrowserSpecialEvents eventName, evSpecial[<%= watchSpecialEvents.nativeEvent %>], evSpecial[<%= watchSpecialEvents.listener %>]
+		nativeEventName = evSpecial[<%= watchSpecialEvents.nativeEvent %>]
+		listener = _defineBrowserSpecialEvents eventName, nativeEventName, evSpecial[<%= watchSpecialEvents.listener %>]
 	else
+		nativeEventName = eventName
 		listener = _defineBrowserBublleEvent eventName
-	_browserListeners[eventName] = listener
-	window.addEventListener eventName, listener, true
+	_browserListeners[eventName] = [nativeEventName, listener]
+	window.addEventListener nativeEventName, listener, true
 	return
+
+###*
+ * @private
+###
+_browserWrapEvent = (eventName, event, subEle, target, component)->
+	eventClss = _watchSpecialEventsWrapper[eventName]
+	unless eventClss
+		eventClss = EventWrapper
+	eventWrapper = new eventClss eventName, event, subEle, event.bubbles
+	_defineProperties eventWrapper,
+		target: value: target,
+		component: value: component
+	return eventWrapper
 ###*
  * Browser normal events
 ###
@@ -43,13 +58,7 @@ _defineBrowserBublleEvent = (eventName)->
 					listenerMethod = component[<%= component.listeners %>][listenerName]
 					throw new Error "#{tagName} component: Unknown listener #{listenerName}" unless listenerMethod
 					# wrap event
-					eventClss = _watchSpecialEventsWrapper[eventName]
-					unless eventClss
-						eventClss = EventWrapper
-					eventWrapper = new eventClss eventName, event, subEle, event.bubbles
-					_defineProperties eventWrapper,
-						target: value: target,
-						component: value: component
+					eventWrapper = _browserWrapEvent eventName, event, subEle, target, component
 					# trigger the event
 					listenerMethod.call subEle, eventWrapper
 					# break this event on this component 
@@ -73,35 +82,37 @@ _defineBrowserSpecialEvents = (eventName, nativeEventName, listenerWrapper)->
 		# seek
 		foundElements = []
 		for ele,k in eventPath
-			# add element if has this event attribute
-			foundElements.push ele if ele.hasAttribute eventAttrName
 			# check for component
 			tagName = ele.tagName.toUpperCase()
-			componentDescriptor = _components[tagName]
-			continue unless componentDescriptor
-			component = _data(ele).component ?= _initComponent ele
-			# skip if no element with this event
-			continue unless foundElements.length
 			# call event for each element
-			for subEl in foundElements
-				try
-					listenerName = subEle.getAttribute eventAttrName
-					continue unless listenerName
-					listenerMethod = component[<%= component.listeners %>][listenerName]
-					throw new Error "#{tagName} component: Unknown listener #{listenerName}" unless listenerMethod
-					# wrap event
-
-					# wrap and call event
-					listenerWrapper(listenerMethod).call subEle
-				catch e
-					# ...
-				
-
+			if _components[tagName] and foundElements.length
+				component = _data(ele).component ?= _initComponent ele
+				for subEle in foundElements
+					try
+						listenerName = subEle.getAttribute eventAttrName
+						continue unless listenerName
+						listenerMethod = component[<%= component.listeners %>][listenerName]
+						throw new Error "#{tagName} component: Unknown listener #{listenerName}" unless listenerMethod
+						# wrap event
+						eventWrapper = _browserWrapEvent eventName, event, subEle, target, component
+						# wrap and call event
+						listenerWrapper(listenerMethod).call subEle, eventWrapper
+					catch err
+						Reactor.error 'Emit-event>>', err
+				# empty
+				foundElements.length = 0
+			# add element if has this event attribute
+			foundElements.push ele if ele.hasAttribute eventAttrName
+		# warn if some elements found without component
+		Reactor.warn 'Emit-event', "Found events without component at: #{foundElements.map(_elementCssSelector).join(', ')}" if foundElements.length
+		return
+			
 ###*
  * @private
  * Remove window event
  * @param {string} eventName - uppercased event name
 ###
 _removeBrowserEvent= (eventName)->
-	window.removeEventListener eventName, _browserListeners[eventName], true
+	ev = _browserListeners[eventName]
+	window.removeEventListener ev[0], ev[1], true
 	return

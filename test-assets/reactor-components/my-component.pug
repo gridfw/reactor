@@ -25,11 +25,11 @@ html
 		div
 			my-component
 				form
-					h1 This is my component
+					h1 This is my component: #{self.name}
 					input.txt.text-center(type="text" value="-- test value --")
 					div.btns.text-right
 						span.btn(:click="okClick" :mouseover="okHover") ok
 						span.btn(:click="cancelClick") cancel
 		//- js
 		script(src="../build/reactor.js")
-		script(src="component1.js")
+		script(src="my-component.js")

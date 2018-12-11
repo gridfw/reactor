@@ -31,12 +31,14 @@ EventWrapperPrototype = EventWrapper.prototype
 			_defineProperty this, keyName, value: v
 			v
 	else
+		keyArr = keyName
+		keyName= keyArr[0]
 		attrGet = ->
 			ev= @originalEvent
-			for att in keyName
+			for att in keyArr
 				v = ev[att]
 				break if v
-			_defineProperty this, keyName[0], value: v
+			_defineProperty this, keyName, value: v
 			v
 	_defineProperty EventWrapperPrototype, keyName, get: attrGet
 	return
