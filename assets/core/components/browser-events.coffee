@@ -35,7 +35,7 @@ _browserWrapEvent = (eventName, event, subEle, target, component)->
 ###
 _defineBrowserBublleEvent = (eventName)->
 	(event)->
-		eventAttrName = ':' + eventName
+		eventAttrName = '@' + eventName
 		# get path
 		target = event.target
 		targetIndx = 0
@@ -64,7 +64,7 @@ _defineBrowserBublleEvent = (eventName)->
 					# break this event on this component 
 					break unless eventWrapper.bubbles
 				catch err
-					Reactor.error 'Component-Exec>>', err
+					componentDescriptor[<%= component.error %>] 'Component-Exec', err
 			# hide sub component
 			target = ele
 			targetIndx = k
@@ -75,7 +75,7 @@ _defineBrowserBublleEvent = (eventName)->
 ###
 _defineBrowserSpecialEvents = (eventName, nativeEventName, listenerWrapper)->
 	(event)->
-		eventAttrName = ':' + eventName
+		eventAttrName = '@' + eventName
 		# get path
 		target = event.target
 		eventPath = event.path || _targetPathGen target
@@ -85,7 +85,8 @@ _defineBrowserSpecialEvents = (eventName, nativeEventName, listenerWrapper)->
 			# check for component
 			tagName = ele.tagName.toUpperCase()
 			# call event for each element
-			if _components[tagName] and foundElements.length
+			componentDescriptor = _components[tagName]
+			if componentDescriptor and foundElements.length
 				component = _data(ele).component ?= _initComponent ele
 				for subEle in foundElements
 					try
@@ -98,7 +99,7 @@ _defineBrowserSpecialEvents = (eventName, nativeEventName, listenerWrapper)->
 						# wrap and call event
 						listenerWrapper(listenerMethod).call subEle, eventWrapper
 					catch err
-						Reactor.error 'Emit-event>>', err
+						componentDescriptor[<%= component.error %>] 'Emit-event', err
 				# empty
 				foundElements.length = 0
 			# add element if has this event attribute

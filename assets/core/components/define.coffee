@@ -5,7 +5,11 @@
  * @optional @param {Map internal listeners} options.listeners - Map of internal listeners used inside browser
  * @optional @param {Map} attr - Map of external properties (methods and attributes) @see documentation
  * @optional @param {Map} attrs - alias to attr
+ * @optional @param {Map} attributes - alias to attr
  * @optional @param {Map} properties - alias to attr
+ * @optional @param {Map} props - alias to attr
+ * @optional @param {function} options.onError(id, error) - sync function to call when error happens
+ * @optional @param {function} options.onWarn(id, error) - sync function to call when warning
 ###
 _components = _create null
 COMPONENT_NAME_CHECK = /^[A-Z][A-Z-]+[A-Z]$/
@@ -14,6 +18,9 @@ COMPONENT_NAME_CHECK = /^[A-Z][A-Z-]+[A-Z]$/
 	var componentAttr = [
 		'listeners'
 		'render' # function that will render this component
+		# logs
+		'warn'
+		'error'
 	];
 	var component = Object.create(null);
 	for(var i=0, len=componentAttr.length; i<len; ++i)
@@ -50,10 +57,28 @@ _defineProperty Reactor, 'define', value: (componentName, options)->
 	# check for render
 	unless component[<%= component.render %>] = _reactorTemplateRender[options.template]
 		throw new Error "Unknown template: #{options.template}"
-
+	# log warnings and Errors
+	# this a generated code via template at compile time :D
+	<%
+	for(var logType in ['onWarn', 'onError']){
+		logTypeName = logType.substr(2).toLowerCase()
+	%>
+	<%= logType %> = options.<%= logType %>
+	if <%= logType %>
+		throw new Error "Options.<%= logType %> expected function" unless typeof <%= logType %> is 'function'
+		component[<%= component[logTypeName] %>] = ->
+			try
+				<%= logType %>.apply this, arguments
+			catch err
+				_error <%= logType %>, err
+	else
+		component[<%= component[logTypeName] %>] = _<%= logTypeName %>
+	<% } %>
+	# add properties
+	for prop in ['properties', 'props', 'attributes', 'attr', 'attrs']
+		_defineComponentProperties component, options[prop] if options[prop]
 	# chain
 	this
-
 # create component basic style in browsers
 <% if(mode === 'browser') { %>
 _styleTagId = 'Reactor-' + Math.random().toString(32).substr(2)
@@ -68,3 +93,8 @@ _enableComponentBasicStyle = ->
 	stl += '{display:block}' if stl
 	styleTag.innerText = stl
 <% } %>
+
+###*
+ * define component properties
+###
+_defineComponentProperties = (component, properties)->
