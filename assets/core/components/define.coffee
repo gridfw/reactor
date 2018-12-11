@@ -18,6 +18,7 @@ COMPONENT_NAME_CHECK = /^[A-Z][A-Z-]+[A-Z]$/
 	var componentAttr = [
 		'listeners'
 		'render' # function that will render this component
+		'prototype' # basic component prototype
 		# logs
 		'warn'
 		'error'
@@ -75,8 +76,13 @@ _defineProperty Reactor, 'define', value: (componentName, options)->
 		component[<%= component[logTypeName] %>] = _<%= logTypeName %>
 	<% } %>
 	# add properties
+	componentProto = _create null
 	for prop in ['properties', 'props', 'attributes', 'attr', 'attrs']
-		_defineComponentProperties component, options[prop] if options[prop]
+		if options[prop]
+			throw new Error "Illegal Options.#{prop}" unless typeof options[prop] is 'object'
+			_defineComponentProperties componentProto, options[prop] 
+	_setPrototypeOf componentProto, COMPONENT_PROTOTYPE
+	component[<%= component.prototype %>] = componentProto
 	# chain
 	this
 # create component basic style in browsers
@@ -97,4 +103,14 @@ _enableComponentBasicStyle = ->
 ###*
  * define component properties
 ###
-_defineComponentProperties = (component, properties)->
+_defineComponentProperties = (componentProto, properties)->
+	for k,v of properties
+		throw new Error "Duplicated property: #{k}" if componentProto[k]
+		# add as method
+		if typeof v is 'function'
+			v= value: v
+		# add as getter/setter
+		else unless typeof v is 'object' and v
+			throw new Error "Illegal property: #{k}"
+		_defineProperty componentProto, k, v
+	return

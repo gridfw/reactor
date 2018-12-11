@@ -3,6 +3,7 @@
 _create = Object.create
 _defineProperty = Object.defineProperty
 _defineProperties = Object.defineProperties
+_setPrototypeOf = Object.setPrototypeOf
 
 ###*
  * Create random attribute name
