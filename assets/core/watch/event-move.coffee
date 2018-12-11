@@ -60,8 +60,8 @@ window.addEventListener 'mousedown', _moveMouseDown, true
 
 ### move event wrapper ###
 class MoveEventWrapper extends EventWrapper
-	constructor: (event, currentTarget, bubbles)->
-		super event, currentTarget, bubbles
+	constructor: (eventName, event, currentTarget, bubbles)->
+		super eventName, event, currentTarget, bubbles
 		# calc
 		x = event.clientX
 		y = event.clientY

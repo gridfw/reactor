@@ -182,7 +182,7 @@ _watchEventExec = (event, eventName) ->
 		eventClss = _watchSpecialEventsWrapper[eventName]
 		unless eventClss
 			eventClss = EventWrapper
-		evnt = new eventClss event, ele, bubbles
+		evnt = new eventClss eventName, event, ele, bubbles
 		# exec all listeners
 		bubbles = _triggerEvent ele, ev, evnt, bubbles
 	return

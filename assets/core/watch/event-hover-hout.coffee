@@ -24,7 +24,7 @@ _watchHoverOut = (onOver, onOut) ->
 		data = _data this
 		# call when not already hover
 		unless data[randomId]
-			onOver.call this, event if onOver
+			onOver.call this, (new EventWrapper 'hover', event, this, event.bubbles) if onOver
 			data[randomId] = yes
 			# out listener
 			outListener = (event2)=>
@@ -34,7 +34,7 @@ _watchHoverOut = (onOver, onOut) ->
 					el = el.parentNode
 				data[randomId] = no
 				window.removeEventListener 'mouseover', outListener, true
-				onOut.call this, (new EventWrapper event, this, event.bubbles) if onOut
+				onOut.call this, (new EventWrapper 'hout', event, this, event.bubbles) if onOut
 				return
 			window.addEventListener 'mouseover', outListener, true
 		return
