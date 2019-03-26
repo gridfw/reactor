@@ -4,15 +4,20 @@ gutil			= require 'gulp-util'
 include			= require "gulp-include"
 rename			= require "gulp-rename"
 coffeescript	= require 'gulp-coffeescript'
-PluginError		= gulp.PluginError
-cliTable		= require 'cli-table'
-template		= require 'gulp-template'
 pug				= require 'gulp-pug'
 through 		= require 'through2'
 path			= require 'path'
 PKG				= require './package.json'
 # sass			= require 'gulp-sass'
 sassCompiler	= require 'node-sass'
+
+
+# settings
+isProd= gutil.env.hasOwnProperty('prod')
+settings=
+	isProd: isProd
+
+GfwCompiler		= require if isProd then 'gridfw-compiler' else '../compiler'
 
 # check arguments
 # SUPPORTED_MODES = ['node', 'browser']
@@ -31,42 +36,42 @@ destBrowserFileName= "#{PKG.name}.js"
 compileCoffeeBrowser = ->
 	gulp.src "assets/core/index.coffee"
 		.pipe include hardFail: true
-		.pipe template mode:'browser'
-		# .pipe gulp.dest "build"
+		.pipe gulp.dest "build"
+		.pipe GfwCompiler.template({mode:'browser', ...settings}).on 'error', GfwCompiler.logError
 		
-		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe coffeescript(bare: true).on 'error', GfwCompiler.logError
 		.pipe rename destBrowserFileName
 		.pipe gulp.dest "build"
-		.on 'error', errorHandler
+		.on 'error', GfwCompiler.logError
 compileNode = ->
 	gulp.src "assets/compiler.coffee"
 		.pipe include hardFail: true
-		.pipe template mode:'node'
+		.pipe GfwCompiler.template({mode:'node', ...settings}).on 'error', GfwCompiler.logError
 		# .pipe gulp.dest "build"
 		
-		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe coffeescript(bare: true).on 'error', GfwCompiler.logError
 		.pipe rename destNodeFileName
 		.pipe gulp.dest "build"
-		.on 'error', errorHandler
+		.on 'error', GfwCompiler.logError
 compileGulp = ->
 	gulp.src "assets/gulp.coffee"
 		.pipe include hardFail: true
-		.pipe template mode:'node'
+		.pipe GfwCompiler.template({mode:'node', ...settings}).on 'error', GfwCompiler.logError
 		# .pipe gulp.dest "build"
 		
-		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe coffeescript(bare: true).on 'error', GfwCompiler.logError
 		.pipe rename 'gulp-reactor'
 		.pipe gulp.dest "build"
-		.on 'error', errorHandler
+		.on 'error', GfwCompiler.logError
 compileTests = ->
 	gulp.src "test-assets/*.coffee"
 		.pipe include hardFail: true
 		# .pipe template settings
 		# .pipe gulp.dest "test-build"
 		
-		.pipe coffeescript(bare: true).on 'error', errorHandler
+		.pipe coffeescript(bare: true).on 'error', GfwCompiler.logError
 		.pipe gulp.dest "test-build"
-		.on 'error', errorHandler
+		.on 'error', GfwCompiler.logError
 compilePugTest = ->
 	gulp.src "test-assets/*.pug"
 		.pipe pug
@@ -76,7 +81,7 @@ compilePugTest = ->
 		# .pipe template settings
 		# .pipe gulp.dest "test-build"
 		.pipe gulp.dest "test-build"
-		.on 'error', errorHandler
+		.on 'error', GfwCompiler.logError
 
 
 # client compiler
@@ -88,40 +93,13 @@ compileClientReactorTemplates = ->
 		.pipe dest 'test-build'
 
 # compile
-watch = ->
-	gulp.watch 'assets/core/**/*.coffee', compileCoffeeBrowser
-	gulp.watch 'assets/**/*.coffee', compileNode
-	gulp.watch 'assets/gulp.coffee', compileGulp
-	gulp.watch 'test-assets/**/*.coffee', compileTests
-	gulp.watch 'test-assets/**/*.pug', compilePugTest
-	return
-
-# error handler
-errorHandler= (err)->
-	# get error line
-	expr = /:(\d+):(\d+):/.exec err.stack
-	if expr
-		line = parseInt expr[1]
-		col = parseInt expr[2]
-		code = err.code?.split("\n")[line-3 ... line + 3].join("\n")
-	else
-		code = line = col = '??'
-	# Render
-	table = new cliTable()
-	table.push {Name: err.name},
-		{Filename: err.filename},
-		{Message: err.message},
-		{Line: line},
-		{Col: col}
-	console.error table.toString()
-	console.log '\x1b[31mStack:'
-	console.error '\x1b[0m┌─────────────────────────────────────────────────────────────────────────────────────────┐'
-	console.error '\x1b[34m', err.stack
-	console.log '\x1b[0m└─────────────────────────────────────────────────────────────────────────────────────────┘'
-	console.log '\x1b[31mCode:'
-	console.error '\x1b[0m┌─────────────────────────────────────────────────────────────────────────────────────────┐'
-	console.error '\x1b[34m', code
-	console.log '\x1b[0m└─────────────────────────────────────────────────────────────────────────────────────────┘'
+watch = (cb)->
+	unless isProd
+		gulp.watch 'assets/core/**/*.coffee', compileCoffeeBrowser
+		gulp.watch 'assets/**/*.coffee', compileNode
+		gulp.watch 'assets/gulp.coffee', compileGulp
+		gulp.watch 'test-assets/**/*.coffee', compileTests
+		gulp.watch 'test-assets/**/*.pug', compilePugTest
 	return
 
 # create default task
